@@ -11,7 +11,7 @@ import argparse
 
 # Allow the passing of a different name to Casper for detection
 # Currently, we're not checking to see if it's in our dictionary (we should do...)
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description="Casper Listening Script")
 parser.add_argument("-n", "--name", dest="name", help="Specify the name to listen for", default="casper")
 parser.add_argument("-c", "--continuous", dest="continuous", help="If True, the script will keep listening despite detecting the keyphrase", action="store_true", default=False)
 args = parser.parse_args()

@@ -26,7 +26,7 @@ Begin Window Window1
    Title           =   "Untitled"
    Visible         =   True
    Width           =   600
-   Begin Shell MyShell
+   Begin Shell Detector
       Arguments       =   ""
       Backend         =   ""
       Canonical       =   False
@@ -159,14 +159,17 @@ End
 
 	#tag Method, Flags = &h0
 		Sub Initialise()
+		  PYTHON_PATH = "/usr/local/bin/python"
+		  
 		  CASPER_LISTEN_PATH = _
 		  App.ExecutableFile.Parent.Parent.Parent.Parent.Parent.Child("helpers").Child("casper listener").Child("casper_listener.py").ShellPath.ToText
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub ListenForCasper()
-		  MyShell.Execute("/usr/local/bin/python" + " " + CASPER_LISTEN_PATH)
+		Sub ListenPassively()
+		  'Starts our custom Python script to listen passively for our keyphrase
+		  Detector.Execute(PYTHON_PATH + " " + CASPER_LISTEN_PATH)
 		End Sub
 	#tag EndMethod
 
@@ -175,10 +178,14 @@ End
 		CASPER_LISTEN_PATH As Text
 	#tag EndProperty
 
+	#tag Property, Flags = &h0
+		PYTHON_PATH As Text
+	#tag EndProperty
+
 
 #tag EndWindowCode
 
-#tag Events MyShell
+#tag Events Detector
 	#tag Event
 		Sub DataAvailable()
 		  dim data as Text = me.ReadAll().ToText
@@ -193,9 +200,7 @@ End
 #tag Events ButtonStart
 	#tag Event
 		Sub Action()
-		  'MyShell.Execute("/usr/local/bin/pocketsphinx_continuous -inmic yes -time yes -keyphrase casper -kws_threshold 1e-10 -kws_delay 0")
-		  
-		  ListenForCasper()
+		  ListenPassively()
 		  
 		  me.Enabled = False
 		  ButtonStop.Enabled = True
@@ -205,7 +210,7 @@ End
 #tag Events ButtonStop
 	#tag Event
 		Sub Action()
-		  MyShell.Close()
+		  Detector.Close()
 		  
 		  ButtonStart.Enabled = True
 		  me.Enabled = False
