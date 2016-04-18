@@ -7,7 +7,15 @@ import sys, os
 import pocketsphinx as ps
 import sphinxbase
 import pyaudio
+import argparse
 
+# Allow the passing of a different name to Casper for detection
+# Currently, we're not checking to see if it's in our dictionary (we should do...)
+parser = argparse.ArgumentParser()
+parser.add_argument("-n", "--name", dest="name", help="Specify the name to listen for", default="casper")
+args = parser.parse_args()
+
+# Get the path to the required files bundled with the script
 parent_dir = os.path.dirname(os.path.abspath(__file__))
 required_dir = os.path.join(parent_dir, 'required')
 
@@ -16,7 +24,7 @@ required_dir = os.path.join(parent_dir, 'required')
 config = ps.Decoder.default_config()
 config.set_string('-hmm', required_dir)
 config.set_string('-dict', os.path.join(required_dir, 'cmudict-en-us.dict'))
-config.set_string('-keyphrase', 'casper')
+config.set_string('-keyphrase', args.name)
 config.set_float('-kws_threshold', 1e-10)
 config.set_float('-kws_delay', 0)
 
@@ -35,7 +43,7 @@ while True:
     else:
          break
     if decoder.hyp() != None:
-        sys.exit('Detected casper')
+        sys.exit('Detected!')
         # If we wanted to continue listening we'd run the code below instead of exiting...
         # decoder.end_utt()
         # decoder.start_utt()

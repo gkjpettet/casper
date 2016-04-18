@@ -186,7 +186,7 @@ End
 		  Info.Text = Info.Text + data
 		  Info.ScrollToEnd()
 		  
-		  if data.IndexOf("Detected casper") > -1 then MsgBox("You said Casper!")
+		  if data.IndexOf("Detected!") > -1 then MsgBox("You said Casper!")
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -226,6 +226,11 @@ End
 		Group="Background"
 		Type="Picture"
 		EditorType="Picture"
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="CASPER_LISTEN_PATH"
+		Group="Behavior"
+		Type="Text"
 	#tag EndViewProperty
 	#tag ViewProperty
 		Name="CloseButton"
