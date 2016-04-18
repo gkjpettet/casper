@@ -23,20 +23,9 @@ Begin Window Window1
    MinWidth        =   64
    Placement       =   0
    Resizeable      =   True
-   Title           =   "Untitled"
+   Title           =   "Keyword Detector"
    Visible         =   True
    Width           =   600
-   Begin Shell Detector
-      Arguments       =   ""
-      Backend         =   ""
-      Canonical       =   False
-      Index           =   -2147483648
-      LockedInPosition=   False
-      Mode            =   1
-      Scope           =   0
-      TabPanelIndex   =   0
-      TimeOut         =   -1
-   End
    Begin TextArea Info
       AcceptTabs      =   False
       Alignment       =   0
@@ -146,34 +135,21 @@ Begin Window Window1
       Visible         =   True
       Width           =   80
    End
+   Begin KeywordDetector PassiveListener
+      Arguments       =   ""
+      Backend         =   ""
+      Canonical       =   False
+      Index           =   -2147483648
+      LockedInPosition=   False
+      Mode            =   1
+      Scope           =   2
+      TabPanelIndex   =   0
+      TimeOut         =   -1
+   End
 End
 #tag EndWindow
 
 #tag WindowCode
-	#tag Event
-		Sub Open()
-		  Initialise()
-		End Sub
-	#tag EndEvent
-
-
-	#tag Method, Flags = &h0
-		Sub Initialise()
-		  PYTHON_PATH = "/usr/local/bin/python"
-		  
-		  CASPER_LISTEN_PATH = _
-		  App.ExecutableFile.Parent.Parent.Parent.Parent.Parent.Child("helpers").Child("casper listener").Child("casper_listener.py").ShellPath.ToText
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Sub ListenPassively()
-		  'Starts our custom Python script to listen passively for our keyphrase
-		  Detector.Execute(PYTHON_PATH + " " + CASPER_LISTEN_PATH)
-		End Sub
-	#tag EndMethod
-
-
 	#tag Property, Flags = &h0
 		CASPER_LISTEN_PATH As Text
 	#tag EndProperty
@@ -185,22 +161,12 @@ End
 
 #tag EndWindowCode
 
-#tag Events Detector
-	#tag Event
-		Sub DataAvailable()
-		  dim data as Text = me.ReadAll().ToText
-		  
-		  Info.Text = Info.Text + data
-		  Info.ScrollToEnd()
-		  
-		  if data.IndexOf("Detected!") > -1 then MsgBox("You said Casper!")
-		End Sub
-	#tag EndEvent
-#tag EndEvents
 #tag Events ButtonStart
 	#tag Event
 		Sub Action()
-		  ListenPassively()
+		  PassiveListener.Listen("casper")
+		  
+		  Info.Text = Info.Text + "Started listening..." + EndofLine
 		  
 		  me.Enabled = False
 		  ButtonStop.Enabled = True
@@ -210,10 +176,20 @@ End
 #tag Events ButtonStop
 	#tag Event
 		Sub Action()
-		  Detector.Close()
+		  Info.Text = Info.Text + "Stopped passively listening" + EndofLine
 		  
 		  ButtonStart.Enabled = True
 		  me.Enabled = False
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events PassiveListener
+	#tag Event
+		Sub DetectionOccurred()
+		  Info.Text = Info.Text + "Detected keyword!" + EndofLine + "Stopped listening." + EndofLine
+		  
+		  ButtonStop.Enabled = False
+		  ButtonStart.Enabled = True
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -409,6 +385,11 @@ End
 			"3 - Parent Window Screen"
 			"4 - Stagger"
 		#tag EndEnumValues
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="PYTHON_PATH"
+		Group="Behavior"
+		Type="Text"
 	#tag EndViewProperty
 	#tag ViewProperty
 		Name="Resizeable"

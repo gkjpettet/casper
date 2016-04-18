@@ -1,0 +1,59 @@
+#tag Module
+Protected Module PassiveListenerOld
+	#tag Method, Flags = &h1
+		Protected Sub Listen()
+		  ' Starts listening for our keyphrase
+		  
+		End Sub
+	#tag EndMethod
+
+
+	#tag Property, Flags = &h1
+		#tag Note
+			The keyphrase to listen for
+		#tag EndNote
+		Protected Keyphrase As Text = "casper"
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private ListenerShell As PassiveListener.PLShell
+	#tag EndProperty
+
+
+	#tag ViewBehavior
+		#tag ViewProperty
+			Name="Index"
+			Visible=true
+			Group="ID"
+			InitialValue="-2147483648"
+			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Left"
+			Visible=true
+			Group="Position"
+			InitialValue="0"
+			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Name"
+			Visible=true
+			Group="ID"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Super"
+			Visible=true
+			Group="ID"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Top"
+			Visible=true
+			Group="Position"
+			InitialValue="0"
+			Type="Integer"
+		#tag EndViewProperty
+	#tag EndViewBehavior
+End Module
+#tag EndModule
