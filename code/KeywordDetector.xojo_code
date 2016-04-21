@@ -23,19 +23,33 @@ Inherits Shell
 		  #endif
 		  
 		  CASPER_LISTEN_PATH = _
-		  App.ExecutableFile.Parent.Parent.Parent.Parent.Parent.Child("helpers").Child("casper listener").Child("casper_listener.py").ShellPath.ToText
+		  App.ExecutableFile.Parent.Parent.Parent.Parent.Parent.Child("helpers").Child("keyword detector").Child("keyword_detector.py").ShellPath.ToText
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub Listen(keyword as Text = "casper")
-		  'Starts our custom Python script to listen passively for the passed keyword
+		  'Starts our custom Python script to listen passively for the passed keyword.
+		  ' Stops the script if it's already running.
 		  
-		  if not initialised then Initialise()
+		  if not initialised then
+		    Initialise()
+		    initialised = True
+		  end if
 		  
-		  if me.IsRunning then me.Close()
+		  me.Stop()
 		  
-		  me.Execute(PYTHON_PATH + " " + CASPER_LISTEN_PATH + " --name " + keyword)
+		  me.Execute(PYTHON_PATH + " " + CASPER_LISTEN_PATH + " --keyword " + keyword)
+		  
+		  mListening = True
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Stop()
+		  if me.isRunning then me.Close()
+		  
+		  mListening = False
 		End Sub
 	#tag EndMethod
 
@@ -54,6 +68,24 @@ Inherits Shell
 
 	#tag Property, Flags = &h21
 		Private initialised As Boolean = False
+	#tag EndProperty
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  return mListening
+			End Get
+		#tag EndGetter
+		#tag Setter
+			Set
+			  ' Read only.
+			End Set
+		#tag EndSetter
+		listening As Boolean
+	#tag EndComputedProperty
+
+	#tag Property, Flags = &h21
+		Private mListening As Boolean = False
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
@@ -97,6 +129,11 @@ Inherits Shell
 			Visible=true
 			Group="Position"
 			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="listening"
+			Group="Behavior"
+			Type="Boolean"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Mode"

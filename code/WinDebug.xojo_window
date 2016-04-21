@@ -1,5 +1,5 @@
 #tag Window
-Begin Window Window1
+Begin Window WinDebug
    BackColor       =   &cFFFFFF00
    Backdrop        =   0
    CloseButton     =   True
@@ -26,7 +26,7 @@ Begin Window Window1
    Title           =   "Keyword Detector"
    Visible         =   True
    Width           =   600
-   Begin TextArea Info
+   Begin TextArea Log
       AcceptTabs      =   False
       Alignment       =   0
       AutoDeactivate  =   True
@@ -38,7 +38,7 @@ Begin Window Window1
       DataSource      =   ""
       Enabled         =   True
       Format          =   ""
-      Height          =   320
+      Height          =   288
       HelpTag         =   ""
       HideSelection   =   True
       Index           =   -2147483648
@@ -67,7 +67,7 @@ Begin Window Window1
       TextFont        =   "System"
       TextSize        =   0.0
       TextUnit        =   0
-      Top             =   20
+      Top             =   52
       Underline       =   False
       UseFocusRing    =   True
       Visible         =   True
@@ -135,7 +135,7 @@ Begin Window Window1
       Visible         =   True
       Width           =   80
    End
-   Begin KeywordDetector PassiveListener
+   Begin KeywordDetector passiveListener
       Arguments       =   ""
       Backend         =   ""
       Canonical       =   False
@@ -146,10 +146,59 @@ Begin Window Window1
       TabPanelIndex   =   0
       TimeOut         =   -1
    End
+   Begin Label Status
+      AutoDeactivate  =   True
+      Bold            =   False
+      DataField       =   ""
+      DataSource      =   ""
+      Enabled         =   True
+      Height          =   20
+      HelpTag         =   ""
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Italic          =   False
+      Left            =   20
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   0
+      Selectable      =   False
+      TabIndex        =   3
+      TabPanelIndex   =   0
+      Text            =   "Idle"
+      TextAlign       =   1
+      TextColor       =   &c00000000
+      TextFont        =   "System"
+      TextSize        =   0.0
+      TextUnit        =   0
+      Top             =   20
+      Transparent     =   True
+      Underline       =   False
+      Visible         =   True
+      Width           =   560
+   End
+   Begin Timer UITimer
+      Index           =   -2147483648
+      LockedInPosition=   False
+      Mode            =   2
+      Period          =   250
+      Scope           =   0
+      TabPanelIndex   =   0
+   End
 End
 #tag EndWindow
 
 #tag WindowCode
+	#tag Event
+		Sub Open()
+		  UITimer.Enabled = True
+		End Sub
+	#tag EndEvent
+
+
 	#tag Property, Flags = &h0
 		CASPER_LISTEN_PATH As Text
 	#tag EndProperty
@@ -164,9 +213,9 @@ End
 #tag Events ButtonStart
 	#tag Event
 		Sub Action()
-		  PassiveListener.Listen("casper")
+		  passiveListener.Listen("casper")
 		  
-		  Info.Text = Info.Text + "Started listening..." + EndofLine
+		  Log.Text = Log.Text + "Started listening..." + EndofLine
 		  
 		  me.Enabled = False
 		  ButtonStop.Enabled = True
@@ -176,20 +225,33 @@ End
 #tag Events ButtonStop
 	#tag Event
 		Sub Action()
-		  Info.Text = Info.Text + "Stopped passively listening" + EndofLine
+		  Log.Text = Log.Text + "Stopped passively listening" + EndofLine
 		  
 		  ButtonStart.Enabled = True
 		  me.Enabled = False
 		End Sub
 	#tag EndEvent
 #tag EndEvents
-#tag Events PassiveListener
+#tag Events passiveListener
 	#tag Event
 		Sub DetectionOccurred()
-		  Info.Text = Info.Text + "Detected keyword!" + EndofLine + "Stopped listening." + EndofLine
+		  Log.Text = Log.Text + "Detected keyword!" + EndofLine + "Stopped listening." + EndofLine
+		  
+		  passiveListener.Stop()
 		  
 		  ButtonStop.Enabled = False
 		  ButtonStart.Enabled = True
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events UITimer
+	#tag Event
+		Sub Action()
+		  if WinDebug.passiveListener.listening then
+		    WinDebug.Status.Text = "Passively listening..."
+		  else
+		    WinDebug.Status.Text = "Idle"
+		  end if
 		End Sub
 	#tag EndEvent
 #tag EndEvents
