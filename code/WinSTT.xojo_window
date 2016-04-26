@@ -1,5 +1,5 @@
 #tag Window
-Begin Window WinDebug
+Begin Window WinSTT
    BackColor       =   &cFFFFFF00
    Backdrop        =   0
    CloseButton     =   True
@@ -23,7 +23,7 @@ Begin Window WinDebug
    MinWidth        =   64
    Placement       =   0
    Resizeable      =   True
-   Title           =   "Keyword Detector"
+   Title           =   "STT"
    Visible         =   True
    Width           =   600
    Begin TextArea Log
@@ -31,7 +31,7 @@ Begin Window WinDebug
       Alignment       =   0
       AutoDeactivate  =   True
       AutomaticallyCheckSpelling=   True
-      BackColor       =   &cFFFF00FF
+      BackColor       =   &cFFFFFF00
       Bold            =   False
       Border          =   True
       DataField       =   ""
@@ -135,14 +135,14 @@ Begin Window WinDebug
       Visible         =   True
       Width           =   80
    End
-   Begin KeywordDetector passiveListener
+   Begin SpeechRecogniser stt
       Arguments       =   ""
       Backend         =   ""
       Canonical       =   False
-      Enabled         =   True
       Index           =   -2147483648
       listening       =   False
       LockedInPosition=   False
+      mListening      =   False
       Mode            =   1
       Scope           =   2
       TabPanelIndex   =   0
@@ -184,7 +184,6 @@ Begin Window WinDebug
       Width           =   560
    End
    Begin Timer UITimer
-      Enabled         =   True
       Index           =   -2147483648
       LockedInPosition=   False
       Mode            =   2
@@ -217,9 +216,9 @@ End
 #tag Events ButtonStart
 	#tag Event
 		Sub Action()
-		  passiveListener.Listen("casper")
+		  stt.Listen()
 		  
-		  Log.Text = Log.Text + "Started listening..." + EndofLine
+		  Log.Text = Log.Text + "Starting script..." + EndofLine
 		  
 		  me.Enabled = False
 		  ButtonStop.Enabled = True
@@ -229,32 +228,37 @@ End
 #tag Events ButtonStop
 	#tag Event
 		Sub Action()
-		  Log.Text = Log.Text + "Stopped passively listening" + EndofLine
+		  Log.Text = Log.Text + "Stopped actively listening" + EndofLine
 		  
 		  ButtonStart.Enabled = True
 		  me.Enabled = False
 		End Sub
 	#tag EndEvent
 #tag EndEvents
-#tag Events passiveListener
+#tag Events stt
 	#tag Event
-		Sub DetectionOccurred()
-		  Log.Text = Log.Text + "Detected keyword!" + EndofLine + "Stopped listening." + EndofLine
+		Sub TranscriptionComplete(result as Text)
+		  Log.Text = Log.Text + "You said: " + result + EndofLine
 		  
-		  passiveListener.Stop()
+		  stt.Stop()
 		  
 		  ButtonStop.Enabled = False
 		  ButtonStart.Enabled = True
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Sub StartedListening()
+		  Log.Text = Log.Text + "Actively listening..." + EndofLine
 		End Sub
 	#tag EndEvent
 #tag EndEvents
 #tag Events UITimer
 	#tag Event
 		Sub Action()
-		  if WinDebug.passiveListener.listening then
-		    WinDebug.Status.Text = "Passively listening..."
+		  if WinSTT.stt.listening then
+		    WinSTT.Status.Text = "Actively listening..."
 		  else
-		    WinDebug.Status.Text = "Idle"
+		    WinSTT.Status.Text = "Idle"
 		  end if
 		End Sub
 	#tag EndEvent

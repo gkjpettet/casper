@@ -1,11 +1,23 @@
 #tag Class
-Protected Class KeywordDetector
+Protected Class SpeechRecogniser
 Inherits Shell
 	#tag Event
 		Sub DataAvailable()
+		  dim result as Text
 		  dim data as String = me.ReadAll()
 		  
-		  if data.Contains("Detected!") then DetectionOccurred()
+		  if data.Contains("Listening...") then
+		    mListening = True
+		    StartedListening()
+		  end if
+		  
+		  if data.Contains("STT output:") then 
+		    ' We've successfully translated the speech, grab it, trim it and return it
+		    result = data.Right(data.Len - data.InStr("STT output:")).Trim.ToText
+		    TranscriptionComplete(result)
+		    me.Stop()
+		    return
+		  end if
 		End Sub
 	#tag EndEvent
 
@@ -22,14 +34,14 @@ Inherits Shell
 		    PYTHON_PATH = "python"
 		  #endif
 		  
-		  CASPER_LISTEN_PATH = _
-		  App.ExecutableFile.Parent.Parent.Parent.Parent.Parent.Child("helpers").Child("keyword detector").Child("keyword_detector.py").ShellPath.ToText
+		  STT_PATH = _
+		  App.ExecutableFile.Parent.Parent.Parent.Parent.Parent.Child("helpers").Child("speech processing").Child("stt.py").ShellPath.ToText
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Listen(keyword as Text = "casper")
-		  'Starts our custom Python script to listen passively for the passed keyword.
+		Sub Listen()
+		  'Starts our custom Python script to listen for speech and convert to text
 		  ' Stops the script if it's already running.
 		  
 		  if not initialised then
@@ -39,9 +51,7 @@ Inherits Shell
 		  
 		  me.Stop()
 		  
-		  me.Execute(PYTHON_PATH + " " + CASPER_LISTEN_PATH + " --keyword " + keyword)
-		  
-		  mListening = True
+		  me.Execute(PYTHON_PATH + " " + STT_PATH)
 		End Sub
 	#tag EndMethod
 
@@ -55,16 +65,13 @@ Inherits Shell
 
 
 	#tag Hook, Flags = &h0
-		Event DetectionOccurred()
+		Event StartedListening()
 	#tag EndHook
 
+	#tag Hook, Flags = &h0
+		Event TranscriptionComplete(result as Text)
+	#tag EndHook
 
-	#tag Property, Flags = &h21
-		#tag Note
-			The location of the capser_listen.py script
-		#tag EndNote
-		Private CASPER_LISTEN_PATH As Text
-	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private initialised As Boolean = False
@@ -84,15 +91,16 @@ Inherits Shell
 		listening As Boolean
 	#tag EndComputedProperty
 
-	#tag Property, Flags = &h21
-		Private mListening As Boolean = False
+	#tag Property, Flags = &h0
+		mListening As Boolean = False
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		#tag Note
-			The location of the python interpreter
-		#tag EndNote
 		Private PYTHON_PATH As Text
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private STT_PATH As Text
 	#tag EndProperty
 
 
@@ -100,21 +108,18 @@ Inherits Shell
 		#tag ViewProperty
 			Name="Arguments"
 			Visible=true
-			Group="Position"
 			Type="String"
 			EditorType="String"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Backend"
 			Visible=true
-			Group="Position"
 			Type="String"
 			EditorType="String"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Canonical"
 			Visible=true
-			Group="Position"
 			Type="Boolean"
 			EditorType="Boolean"
 		#tag EndViewProperty
@@ -136,9 +141,14 @@ Inherits Shell
 			Type="Boolean"
 		#tag EndViewProperty
 		#tag ViewProperty
+			Name="mListening"
+			Group="Behavior"
+			InitialValue="False"
+			Type="Boolean"
+		#tag EndViewProperty
+		#tag ViewProperty
 			Name="Mode"
 			Visible=true
-			Group="Position"
 			Type="Integer"
 			EditorType="Integer"
 		#tag EndViewProperty
@@ -157,7 +167,6 @@ Inherits Shell
 		#tag ViewProperty
 			Name="TimeOut"
 			Visible=true
-			Group="Position"
 			Type="Integer"
 			EditorType="Integer"
 		#tag EndViewProperty

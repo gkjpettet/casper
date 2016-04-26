@@ -1,10 +1,10 @@
 #tag Module
 Protected Module Helper
 	#tag Method, Flags = &h0
-		Function Contains(Extends haystack as Text, needle as Text) As Boolean
-		  ' Returns True if tneedle is found within haystack
+		Function Contains(Extends haystack as String, needle as String) As Boolean
+		  ' Returns True if needle is found within haystack
 		  
-		  if haystack.IndexOf(needle) > -1 then
+		  if haystack.InStr(needle) > -1 then
 		    return True
 		  else
 		    return False
